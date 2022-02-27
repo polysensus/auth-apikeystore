@@ -8,5 +8,5 @@ spec:
       containers:
       - name: service
         env:
-          - name: APIKEYSTORE_WRITER
-            value: "true"
+          - name: APIKEYSTORE_MODE
+            value: "writer"

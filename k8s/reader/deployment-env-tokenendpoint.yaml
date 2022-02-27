@@ -8,8 +8,8 @@ spec:
       containers:
       - name: service
         env:
-          - name: APIKEYSTORE_READER
-            value: "true"
+          - name: APIKEYSTORE_MODE
+            value: "reader"
 
           - name: APIKEYSTORE_EXCHANGEURL
             valueFrom:

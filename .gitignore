@@ -1,0 +1,3 @@
+.local/dev
+env
+k8s/tmp
