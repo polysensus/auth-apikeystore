@@ -21,13 +21,12 @@ Recomendations taken from [here](https://cheatsheetseries.owasp.org/cheatsheets/
 ## API Key Schema
 
 api_key_collection
-name: default nano id 11 base64 encoded
-secret_hash: password hash[1]
-firebase_user_id: the firebase identity for the user that owns the key
-applications: empty or platform defined strings restricting which platform applications can redeem the key.
-
-audience: defines how the audience for any generated token is created[2]
-scopes: defines the scopes requested for any access token obtained using the key[3]
+* name: default nano id 11 base64 encoded
+* secret_hash: password hash[1]
+* user_id: foreighn key to the firebase identity for the user that owns the key
+* applications: empty or platform defined strings restricting which platform applications can redeem the key.
+* audience: defines how the audience for any generated token is created[2]
+* scopes: defines the scopes requested for any access token obtained using the key[3]
 
 api_key_usage_collection[3]
 rate_cap: 
