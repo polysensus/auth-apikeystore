@@ -1,0 +1,5 @@
+nameSuffix: -reader
+resources:
+  - ./../apikeystore
+patchesStrategicMerge:
+  - deployment-env-tokenendpoint.yaml

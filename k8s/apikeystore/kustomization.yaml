@@ -1,0 +1,9 @@
+resources:
+  - deployment.yaml
+  - service.yaml
+configMapGenerator:
+  - name: apikeystore
+    literals:
+      - APIKEYSTORE_ADDRESS=0.0.0.0:8401
+      - APIKEYSTORE_PREFIX=node/
+      - APIKEYSTORE_EXCHANGEURL=http://tokenendpoint:3000/token

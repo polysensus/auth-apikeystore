@@ -1,0 +1,5 @@
+nameSuffix: -writer
+resources:
+  - ./../apikeystore
+patchesStrategicMerge:
+  - deployment-env.yaml
