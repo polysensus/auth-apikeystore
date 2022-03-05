@@ -2,21 +2,35 @@
 # Use base golang image from Docker Hub
 FROM golang:1.17 as build
 
-WORKDIR /apikeystore
+WORKDIR /build/apibin
 
 # Install dependencies in go.mod and go.sum
-COPY go/go.mod go/go.sum ./
+COPY apibin/go.mod apibin/go.sum ./
 RUN go mod download
 
+
+WORKDIR /build/apihttp
+COPY apihttp/go.mod apihttp/go.sum ./
+RUN go mod download
+
+WORKDIR /build/service
+COPY service/go.mod service/go.sum ./
+RUN go mod download
+
+
+WORKDIR /build
 # Copy rest of the application source code
-COPY go/ ./
+COPY apibin/ ./apibin/
+COPY apihttp/ ./apihttp/
+COPY service/ ./service/
 
 RUN find .
 
+WORKDIR /build/service
 # Skaffold passes in debug-oriented compiler flags
 ARG SKAFFOLD_GO_GCFLAGS
 RUN echo "Go gcflags: ${SKAFFOLD_GO_GCFLAGS}"
-RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -mod=readonly -v -o /apikeystore
+RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -mod=readonly -v -o /build/server cmd/apikeystore/main.go
 
 # Now create separate deployment image
 FROM gcr.io/distroless/base
@@ -26,6 +40,6 @@ FROM gcr.io/distroless/base
 # See https://golang.org/pkg/runtime/
 ENV GOTRACEBACK=single
 
-WORKDIR /apikeystore
-COPY --from=build /apikeystore .
-ENTRYPOINT ["./apikeystore"]
+WORKDIR /service
+COPY --from=build /build/server ./
+ENTRYPOINT ["/service/server"]

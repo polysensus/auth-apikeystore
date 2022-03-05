@@ -1,0 +1,6 @@
+table CreateRequest {
+  display_name:string;
+  audience:string;
+  scopes:string;
+}
+root_type CreateRequest;

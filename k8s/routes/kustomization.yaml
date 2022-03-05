@@ -1,0 +1,3 @@
+resources:
+  - ingressroute.yaml
+  - middleware-stripprefix-ingressroute.yaml

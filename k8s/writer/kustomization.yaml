@@ -1,5 +1,9 @@
 nameSuffix: -writer
+commonLabels:
+  app: apikeystore-writer
+
 resources:
   - ./../apikeystore
 patchesStrategicMerge:
+  - deployment-serviceaccount.yaml
   - deployment-env.yaml

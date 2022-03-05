@@ -8,16 +8,23 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/robinbryce/apikeystore/server"
+	"github.com/robinbryce/apikeystore/apibin"
+	"github.com/robinbryce/apikeystore/apihttp"
+	"github.com/robinbryce/apikeystore/service/server"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
 const (
-	Name = "authex"
+	Name = "apikeystore"
 )
 
 func main() {
+	x := apibin.APIKey{}
+	fmt.Printf("%v\n", x)
+	y := apihttp.APIKey{}
+	fmt.Printf("%v\n", y)
+
 	v := viper.New()
 	cfg := server.NewConfig()
 	setDefaultConfig(v, Name, cfg)
@@ -26,7 +33,6 @@ func main() {
 
 	var cfgFile string
 	f.StringVar(&cfgFile, "config", "", "configuration file. all options can be set in this")
-
 
 	f.StringVar(
 		&cfg.Mode, "mode", cfg.Mode, `

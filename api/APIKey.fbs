@@ -1,0 +1,44 @@
+// APIKey handled by the user has the form
+//
+// BASE64(display_name)[:8].BASE64(id || alg || salt || secret)
+//
+// This form lets the user treat it as an opaque key with personal identifier,
+// whilst internaly it is comaptible with the client_id/secret scheme requred
+// by the client credentials grant type for openid connect.
+//
+// The BASE64(id || alg || salt || secret) is returned to the users from the
+// request that creates the API key and is never stored. The display_name is
+// include to make it easier for the user to identify the api keys indepdently
+// and is not interpreted at all when the api key is redeemed. The validity of
+// the API key is determined entirely by (alg || salt || secret) (including
+// retrieving the stored APIKey record.
+//
+table APIKey {
+  // derived_secret is an argon2id secret derived from the user supplied
+  // password. See https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#argon2id
+  derived_secret:[ubyte];
+  derived_secret_alg:string; // = "argon2id:3 64MB 32"; // argon2id with times=3, memory of 64Mb and key length = 32
+
+  // display_name is a human friendly name for the api key.
+  display_name:string;
+
+  // TODO: Consider supporting: An APIKey can be owned by a user, a group, an
+  // organisation, a wallet or nobody (ie a key handed out for anyone that is
+  // logically owned by the platform itself)
+
+  // user_id is the unique identifier for the user record for the owner of the api key
+  user_id:string;
+
+  // audience defines how the audience for any token should be *determined*. Its an
+  // action:pattern string eg,
+  // exactly:somestring | matching:*some*glob* | any:one,two,three
+  // ':' is illeagal in the string part. Absence of ':' is shorthand for exactly:something
+  // The service defines how matching & any are reconciled to a single token audience
+  audience:string;
+
+  // scopes defines the scopes requested for any access token issued for this
+  // api key. They are requested as is, no interpretation is performed.
+  scopes:string;
+}
+
+root_type APIKey;

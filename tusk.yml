@@ -1,0 +1,69 @@
+interpreter: bash -c
+name: apikeystore
+usage: conveniences and ergonomics for apikeystore
+options:
+  host:
+    default: "http://127.0.0.1:8401"
+  service:
+    default: "apibin.APIKeyStore"
+  method:
+    default: "Create"
+  verbose:
+    type: bool
+    default: false
+    short: "v"
+  noverify:
+    type: bool
+    default: false
+    short: "k"
+
+tasks:
+
+  curl:
+    options:
+      outdir:
+        default: "."
+        short: "o"
+        usage: "the directory to write the flatc bins to"
+      schema:
+        usage: "flatbuffer schema file (fbs)"
+        short: "s"
+      jsonfile:
+        default: "create.json"
+        short: "j"
+    run:
+      - command:
+          exec: |
+            set -e
+            # flatc -b api/apikeystore.fbs ${jsonfile}
+            # It is not possible to transcode json to binary on stdout. flatc
+            # insists on generating files. the c++ library can do it tho
+            #
+            VERBOSE=${verbose}
+            NOVERIFY=${noverify}
+
+            [ ! -f "${jsonfile}" ] && echo "json file \"${jsonfile}\" does not exist" && exit 1
+            export BASENAME=$(basename ${jsonfile} .json)
+
+            SCHEMA=${schema}
+            SCHEMA=${SCHEMA+api/$BASENAME.fbs}
+            [ ! -f "${SCHEMA}" ] && echo "schema file \"${SCHEMA}\" does not exist" && exit 1
+
+            flatc -o ${outdir} -b "${SCHEMA}" "${jsonfile}"
+
+            cat <<PYEND | python3 > ${outdir}/$BASENAME.req.bin
+            import os, sys, os.path
+            data = open(os.path.join("${outdir}", os.environ["BASENAME"] + ".bin"), "rb").read()
+            sys.stdout.buffer.write(bytes(1)) # write 0 byte - not compressed
+            sys.stdout.buffer.write(len(data).to_bytes(4, 'big'))
+            sys.stdout.buffer.write(data)
+            PYEND
+            cat ${outdir}/$BASENAME.req.bin \
+              |  curl \
+                  $(${verbose} && echo "-v") \
+                  $(${noverify} && echo "-k") \
+                  --http2-prior-knowledge --data-binary @- \
+                  -H "Content-Type: application/grpc" \
+                  -H "TE: trailers" ${host}/${service}/${method} \
+                  -so  ${outdir}/$BASENAME.res.bin
+            xxd ${outdir}/$BASENAME.res.bin

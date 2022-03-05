@@ -1,0 +1,4 @@
+table CreateResult {
+  apikey:string;
+}
+root_type CreateResult;

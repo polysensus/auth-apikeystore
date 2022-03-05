@@ -17,7 +17,6 @@ spec:
       labels:
         app: apikeystore
     spec:
-
       containers:
         - name: service
           image: apikeystore
@@ -30,6 +29,13 @@ spec:
                 configMapKeyRef:
                   name: apikeystore
                   key: APIKEYSTORE_ADDRESS
+
+            - name: APIKEYSTORE_PROJECTID
+              valueFrom:
+                configMapKeyRef:
+                  name: apikeystore
+                  key: APIKEYSTORE_PROJECTID
+
 
             - name: APIKEYSTORE_PREFIX
               valueFrom:

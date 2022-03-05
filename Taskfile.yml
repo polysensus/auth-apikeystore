@@ -8,6 +8,8 @@ env:
   # This override is provided so that the generate task can be used to
   # quick start consumers of this repository with useful defaults.
   K8S_GENERATE_DIR: '{{.K8S_GENERATE_DIR | default "k8s/tmp"}}'
+  DESTDIR: '{{.DESTDIR | default "."}}'
+  PROTOC_IMAGE: '{{.PROTOC_IMAGE | default "eu.gcr.io/iona-1/protoc:protoc-latest"}}'
 
 vars:
   BUILD_ARTIFACTS: k8s/tmp/skaffold/build-artifacts.json
@@ -31,12 +33,20 @@ tasks:
       - |
         mkdir -p {{.ENV}}
 
+        DOMAIN=${DOMAIN:-${ORGANISATION}.${TLD}}
+
         CONTEXT=${CONTEXT:-$(kubectl config current-context)}
         CLUSTER=$(kubectl config get-contexts ${CONTEXT} --no-headers=true | tr -s ' ' | cut -d ' ' -f3)
         SKAFFOLD_DEFAULT_REPO=${SKAFFOLD_DEFAULT_REPO:-eu.gcr.io/${CONTEXT}}
         CONTEXT_NAMESPACE=${CONTEXT_NAMESPACE:-$(echo ${CONTEXT} | cut -d '-' -f1)}
-        NAMESPACE=${NAMESPACE:-${CONTEXT_NAMESPACE}-${APPNAME}}
-        DOMAIN=${DOMAIN:-localhost}
+        FQDN=${FQDN:-"${CONTEXT_NAMESPACE}.${DOMAIN}"}
+        HOST=${HOST:-"http://${CONTEXT_NAMESPACE}.${ORGANISATION}.${TLD}"}
+
+        APPNAME=${APPNAME:-$(basename $PWD)}
+
+        # NAMESPACE=${NAMESPACE:-${CONTEXT_NAMESPACE}-${APPNAME}}
+        NAMESPACE=${NAMESPACE:-chain1}
+        INGRESS_PREFIX=${INGRESS_PREFIX:-/${APPNAME}}
 
         cat <<EOF > {{.ENV}}/.env
         CONTEXT=${CONTEXT}
@@ -44,39 +54,95 @@ tasks:
         SKAFFOLD_DEFAULT_REPO=${SKAFFOLD_DEFAULT_REPO}
         CONTEXT_NAMESPACE=${CONTEXT_NAMESPACE}
         NAMESPACE=${NAMESPACE}
+        INGRESS_PREFIX=${INGRESS_PREFIX}
         APPNAME=${APPNAME}
         PYENV=${PYENV}
         PORT=${PORT}
+        FQDN=${FQDN}
         HOST=${HOST}
-        TOKEN=${TOKEN}
         DOMAIN=${DOMAIN}
         EOF
+        # cd service
+        # go install github.com/googleapis/api-linter/cmd/api-linter
 
     env:
+      ORGANISATION: '{{.ORGANISATION | default "thaumagen"}}'
+      TLD: '{{.TLD | default "io"}}'
+      HOST: ''
+      DOMAIN: ''
+      FQDN: ""
       CONTEXT: "{{.CONTEXT}}"
       CONTEXT_NAMESPACE: "{{.CONTEXT_NAMESPACE}}"
       NAMESPACE: "{{.NAMESPACE}}"
       TAG: "{{.TAG}}"
       SKAFFOLD_DEFAULT_REPO: "{{.SKAFFOLD_DEFAULT_REPO}}"
-      APPNAME: '{{.APPNAME | default "apikeystore"}}'
+      APPNAME: '{{.APPNAME}}'
+      INGRESS_PREFIX: '{{.INGRESS_PREFIX}}'
       PYENV: '{{.PYENV | default "env"}}'
       PROFILE: '{{.PROFILE | default "local"}}'
       PORT: '{{.PORT | default "8401"}}'
-      HOST: '{{.HOST | default "http://127.0.0.1:8401"}}'
-      TOKEN: '{{.TOKEN | default "xxxinvalidxxx"}}'
-      DOMAIN: '{{.DOMAIN | default "localhost"}}'
+
+
+  generate-build:
+    desc: 'generate all build pre-reqisites'
+    cmds:
+      - task: generate-api
+
+  generate-apihttp:
+    cmds:
+      - |
+        OUTDIR=.
+        PATHS_OPTS="module=github.com/robinbryce/apikeystore,paths=import"
+        docker run --rm -v $(pwd):$(pwd) -w $(pwd) -u $(id -u):$(id -g) $PROTOC_IMAGE \
+          --go_out=$PATHS_OPTS:$OUTDIR \
+          --go-grpc_out=$PATHS_OPTS:$OUTDIR \
+          --validate_out=lang=go,$PATHS_OPTS:$OUTDIR \
+          --openapiv2_out=logtostderr=true,json_names_for_fields=false:$OUTDIR \
+          --grpc-gateway_out=logtostderr=true,$PATHS_OPTS:$OUTDIR \
+          api/*.proto
+
+  generate-apibin:
+    cmds:
+      - |
+        OUTDIR=.
+        docker run --rm -v $(pwd):$(pwd) -w $(pwd) -u $(id -u):$(id -g) neomantra/flatbuffers flatc \
+         -o $OUTDIR \
+        --go --grpc --gen-object-api \
+        --go-namespace apibin \
+        -I api \
+        api/*.fbs
+        # NOTICE:
+        #  Set *BOTH* namespace (in the fbs file) and --go-namespace here to
+        #  get all the generated files in one  directory. go files are placed in
+        #  OURDIR/go-namespace if --go-namespace is set. But grpc go files are
+        #  *always* put in OUTDIR/namespace where namespace is declared in the
+        #  fbs file. If it isn't declared the just go in OUTDIR
+
+  generate-api:
+    deps: [generate-apihttp, generate-apibin]
+
 
   generate:
+    desc: 'generate all pre-requisistes (build & deploy)'
+    cmds:
+      - task: generate-build
+      - task: generate-deploy
+
+  generate-deploy:
     desc: 'generate context dependent manifests and secrets and so on'
     cmds:
       - |
         mkdir -p {{.K8S_GENERATE_DIR}}/dev
+        mkdir -p {{.K8S_GENERATE_DIR}}/dev-reader
+        mkdir -p {{.K8S_GENERATE_DIR}}/dev-writer
         mkdir -p $(dirname {{.BUILD_ARTIFACTS}})
 
         [ -f "${CLIENTID_SECRET_FILE}" ] && source ${CLIENTID_SECRET_FILE}
 
         [ -z "${CLIENT_ID}" ] && echo "CLIENT_ID must be set (or present in CLIENTID_SECRET_FILE)" && exit 1
         [ -z "${CLIENT_SECRET}" ] && echo "CLIENT_SECRET must be set (or present in CLIENTID_SECRET_FILE)" && exit 1
+        # Note: the client secret needs to be shared with the token end point
+        # (tokenator) so is usually copied from there
 
         echo "CLIENT_ID: $CLIENT_ID"
         echo "CLIENT_SECRET: $CLIENT_SECRET"
@@ -86,22 +152,61 @@ tasks:
         CLIENT_SECRET=${CLIENT_SECRET}
         EOF
 
+        CERT_NAME=wild-$(echo ${FQDN} | tr '.' '-')
+
         cat <<EOF > {{.K8S_GENERATE_DIR}}/dev/namespace.yaml
         kind: Namespace
         apiVersion: v1
         metadata:
           name: ${NAMESPACE}
         EOF
+
+        cat <<EOF > {{.K8S_GENERATE_DIR}}/dev/certificate.yaml
+        apiVersion: cert-manager.io/v1
+        kind: Certificate
+        metadata:
+          name: "${CERT_NAME}"
+        spec:
+          commonName: "${FQDN}"
+          secretName: ${CERT_NAME}
+          dnsNames:
+            - "${FQDN}"
+            - "*.${FQDN}"
+          issuerRef:
+            name: letsencrypt-staging-primary-dns
+            kind: ClusterIssuer
+        EOF
+
         cat <<EOF > {{.K8S_GENERATE_DIR}}/dev/kustomization.yaml
         namespace: ${NAMESPACE}
         resources:
           - ./namespace.yaml
-          - ./../../reader
+          - ./certificate.yaml
+          #- ./../../reader
           - ./../../writer
+          - ./../../routes
         secretGenerator:
           - name: apikeystore-tokenendpoint-clientid-secret
             envs:
               - clientidsecret.env
+        patchesJson6902:
+          - target:
+              kind: IngressRoute
+              name: apikeystore
+            path: patch-ingressroute.yaml
+        EOF
+
+        # traefik ingressroute
+        cat <<EOF > {{.K8S_GENERATE_DIR}}/dev/patch-ingressroute.yaml
+        - op: replace
+          path: /spec/routes/0/match
+          value: Host(\`${FQDN}\`) && PathPrefix(\`{{.INGRESS_PREFIX}}/\`) && Method(\`GET\`)
+        - op: replace
+          path: /spec/routes/1/match
+          value: Host(\`${FQDN}\`) && PathPrefix(\`{{.INGRESS_PREFIX}}/\`) && Method(\`POST\`, \`PUT\`, \`PATCH\`, \`DELETE\`)
+        - op: replace
+          path: /spec/tls/secretName
+          value: ${CERT_NAME}
         EOF
 
     env:
@@ -111,10 +216,7 @@ tasks:
       # once, it is not necessary to do so again unless you want to update the
       # secret
       CLIENTID_SECRET_FILE: '{{.CLIENTID_SECRET_FILE | default "k8s/tmp/dev/clientidsecret.env"}}'
-
-    generates:
-      - "{{.K8S_GENERATE_DIR}}/dev/kustomization.yaml"
-      - "{{.K8S_GENERATE_DIR}}/dev/namespace.yaml"
+      INGRESS_PREFIX:
 
   build:
     desc: 'build the images'
@@ -135,12 +237,27 @@ tasks:
         skaffold deploy \
             ${CONTEXT:+--kube-context ${CONTEXT}} \
             ${NAMESPACE:+-n $NAMESPACE} \
+            --label=user-deploy=$USER-apikeystore \
             --build-artifacts {{.BUILD_ARTIFACTS}}
 
   down:
     desc: 'take the app down and clean up the k8s resources'
     cmds:
       - |
+        # -l skaffold.dev/run-id=1ea50cc3-294e-499b-ad59-876378d59ee7
+        for resource in $(kubectl api-resources --verbs=list --namespaced -o name); do
+          for target in $(kubectl get \
+            --show-kind \
+            -l user-deploy=$USER-apikeystore \
+            --ignore-not-found \
+            -n $NAMESPACE \
+            -o name ${resource} 2> /dev/null); do
+            echo $target
+            kubectl delete $target -n $NAMESPACE
+          done
+        done
+
+        exit 0
         skaffold delete \
             ${CONTEXT:+--kube-context ${CONTEXT}} \
             ${NAMESPACE:+-n $NAMESPACE}

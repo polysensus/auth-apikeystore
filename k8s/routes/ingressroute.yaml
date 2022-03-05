@@ -1,0 +1,31 @@
+apiVersion: traefik.containo.us/v1alpha1
+# requires a traefik instance with the kubernetes provider enabled
+
+kind: IngressRoute
+metadata:
+  name: apikeystore
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: PathPrefix(`/apikeystore/`) && Method(`GET`)
+      kind: Rule
+      services:
+        - kind: Service
+          name: apikeystore-reader
+          scheme: http
+          port: http
+      middlewares:
+        - name: strip-ingressroute-prefix
+    - match: PathPrefix(`/apikeystore/`) && Method(`POST`, `PUT`, `PATCH`, `DELETE`)
+      kind: Rule
+      services:
+        - kind: Service
+          name: apikeystore-writer
+          scheme: http
+          port: http
+      middlewares:
+        - name: apikeystore-strip-ingressroute-prefix
+
+  tls:
+    secretName: iona-app-dev

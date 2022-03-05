@@ -1,0 +1,6 @@
+{
+    "cloudcode.active-kubeconfig": "iona-1",
+    "cloudcode.enableTelemetry": true,
+    "cloudcode.verboseLogging": true,
+    "cloudcode.yaml.trace.server": "verbose",
+}

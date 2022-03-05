@@ -7,7 +7,7 @@
       "request": "launch",
       "skaffoldConfig": "${workspaceFolder}/skaffold.yaml",
       "watch": true,
-      "cleanUp": true,
+      "cleanUp": false,
       "portForward": true,
       "debug": [
         {
@@ -21,7 +21,7 @@
           "image": "apikeystore",
           "containerName": "service",
           "sourceFileMap": {
-            "${workspaceFolder}": "/apikeystore"
+            "${workspaceFolder}/go": "/apikeystore"
           }
         }
       ],

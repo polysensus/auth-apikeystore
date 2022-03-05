@@ -1,0 +1,5 @@
+{
+  display_name: "myfirstkey",
+  audience: "audience",
+  scopes: "aaa bbb ccc"
+}
