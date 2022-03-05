@@ -1,4 +1,4 @@
-package server
+package keys
 
 import (
 	"bytes"
@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	StandardAlg   = "argon2id:3 64MB 32"
 	saltLen       = 32
 	passwordLen   = 32
 	apiKeyNameLen = 16
@@ -35,21 +36,18 @@ const (
 )
 
 type APIKey struct {
-	alg Alg
+	alg Alg `firestore:"-"`
 	// Salt is randomly generated when the password is generated. It is safe to (and must be) return to the api key holder
-	Salt []byte
+	Salt []byte `firestore:"-"`
 	// Key is derived from a randomly generated password. The key is
 	// persistently stored. In the api key usage model this key is NOT
 	// sensitive. But also is NOT returned to the user - instead, we return the
 	// password and salt to the user. The password is NOT stored in this type
 	// ever.
-	Key []byte
+	Key []byte `firestore:"key"`
 
-	ClientID    string
-	UserID      string
-	DisplayName string
-	Audience    string
-	Scopes      string
+	ClientID    string `firestore:"client_id"`
+	DisplayName string `firestore:"display_name"`
 }
 
 type APIKeyOption func(*APIKey)
@@ -66,44 +64,33 @@ func WithDisplayName(name string) APIKeyOption {
 	}
 }
 
-func WithUserID(userID string) APIKeyOption {
-	return func(ak *APIKey) {
-		ak.UserID = userID
-	}
-}
-func WithAudience(aud string) APIKeyOption {
-	return func(ak *APIKey) {
-		ak.Audience = aud
-	}
-}
-func WithScopes(scopes string) APIKeyOption {
-	return func(ak *APIKey) {
-		ak.Scopes = scopes
-	}
-}
-
 func NewAPIKey(alg string, opts ...APIKeyOption) (APIKey, error) {
 
+	ak := APIKey{}
+	err := ak.SetOptions(alg, opts...)
+	return ak, err
+}
+
+func (ak *APIKey) SetOptions(alg string, opts ...APIKeyOption) error {
 	var err error
 
-	ak := APIKey{}
 	ak.alg, err = ParseAlg(alg)
 	if err != nil {
-		return APIKey{}, err
+		return err
 	}
 
 	for _, o := range opts {
-		o(&ak)
+		o(ak)
 	}
 
 	// If we didn't get an explicit client id, make one up
 	if len(ak.ClientID) == 0 {
 		ak.ClientID, err = nanoid.ID(clientNanoIDLen)
 		if err != nil {
-			return APIKey{}, nil
+			return nil
 		}
 	}
-	return ak, nil
+	return nil
 }
 
 func Decode(apikey string) (APIKey, []byte, error) {
@@ -142,11 +129,21 @@ func Decode(apikey string) (APIKey, []byte, error) {
 	return ak, password, nil
 }
 
+func (ak *APIKey) RecoverKey(password []byte) []byte {
+
+	return argon2.IDKey(password, ak.Salt, ak.alg.Time, ak.alg.Memory, argon2Threads, ak.alg.KeyLen)
+}
+
 func (ak *APIKey) MatchPassword(password, key []byte) bool {
 
-	ak.Key = argon2.IDKey(password, ak.Salt, ak.alg.Time, ak.alg.Memory, argon2Threads, ak.alg.KeyLen)
+	ak.Key = ak.RecoverKey(password)
 
 	return bytes.Equal(ak.Key, key)
+}
+
+// EncodedKey returns the derived key in url safe base64 encoded form.
+func (ak *APIKey) EncodedKey() string {
+	return base64.URLEncoding.EncodeToString(ak.Key)
 }
 
 func (ak *APIKey) generatePasword() ([]byte, error) {

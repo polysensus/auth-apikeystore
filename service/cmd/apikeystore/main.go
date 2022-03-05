@@ -40,8 +40,13 @@ func main() {
 	`)
 
 	f.StringVar(
-		&cfg.Address, "address", cfg.Address, `
-	Listen address as host:port.
+		&cfg.Address1, "address1", cfg.Address1, `
+	Listen address as host:port (http/1)
+	`)
+
+	f.StringVar(
+		&cfg.Address2, "address2", cfg.Address2, `
+	Listen address as host:port (http2/grpc/flatbuffers).
 	`)
 
 	f.StringVar(

@@ -2,7 +2,9 @@ interpreter: bash -c
 name: apikeystore
 usage: conveniences and ergonomics for apikeystore
 options:
-  host:
+  address1:
+    default: "http://127.0.0.1:8401"
+  address2:
     default: "http://127.0.0.1:8401"
   service:
     default: "apibin.APIKeyStore"
@@ -19,7 +21,39 @@ options:
 
 tasks:
 
-  curl:
+  create:
+    options:
+      display_name:
+        default:
+          command: echo $USER
+        short: "n"
+      aud:
+        default: "test audience"
+      scopes:
+        default: "eth_* net_* admin_nodeInfo"
+    run:
+      - command:
+          exec: |
+            set -e
+            curl \
+             $(${verbose} && echo "-v") \
+             $(${noverify} && echo "-k") \
+             -H "Content-Type: application/json" \
+             -d '{"display_name":"${display_name}","aud":"${aud}","scopes":"${scopes}"}' \
+                ${address1}/node/keys
+  access:
+    args:
+      key:
+    run:
+      - command:
+          exec: |
+            set -e
+            curl \
+             $(${verbose} && echo "-v") \
+             $(${noverify} && echo "-k") \
+                ${address1}/node/access/${key}
+
+  create2:
     options:
       outdir:
         default: "."
@@ -64,6 +98,6 @@ tasks:
                   $(${noverify} && echo "-k") \
                   --http2-prior-knowledge --data-binary @- \
                   -H "Content-Type: application/grpc" \
-                  -H "TE: trailers" ${host}/${service}/${method} \
+                  -H "TE: trailers" ${address2}/${service}/${method} \
                   -so  ${outdir}/$BASENAME.res.bin
             xxd ${outdir}/$BASENAME.res.bin

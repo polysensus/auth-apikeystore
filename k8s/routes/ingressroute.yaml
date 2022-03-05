@@ -12,7 +12,8 @@ spec:
       kind: Rule
       services:
         - kind: Service
-          name: apikeystore-reader
+          # name: apikeystore-reader
+          name: apikeystore-writer
           scheme: http
           port: http
       middlewares:
@@ -23,7 +24,7 @@ spec:
         - kind: Service
           name: apikeystore-writer
           scheme: http
-          port: http
+          port: http2
       middlewares:
         - name: apikeystore-strip-ingressroute-prefix
 

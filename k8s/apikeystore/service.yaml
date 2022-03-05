@@ -10,3 +10,7 @@ spec:
     - name: http
       port: 80
       targetPort: 8401
+    - name: http2
+      port: 82
+      targetPort: 8402
+

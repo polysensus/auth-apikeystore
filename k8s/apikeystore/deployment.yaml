@@ -22,13 +22,19 @@ spec:
           image: apikeystore
           ports:
             - containerPort: 8401
+            - containerPort: 8402
 
           env:
-            - name: APIKEYSTORE_ADDRESS
+            - name: APIKEYSTORE_ADDRESS1
               valueFrom:
                 configMapKeyRef:
                   name: apikeystore
-                  key: APIKEYSTORE_ADDRESS
+                  key: APIKEYSTORE_ADDRESS1
+            - name: APIKEYSTORE_ADDRESS2
+              valueFrom:
+                configMapKeyRef:
+                  name: apikeystore
+                  key: APIKEYSTORE_ADDRESS2
 
             - name: APIKEYSTORE_PROJECTID
               valueFrom:

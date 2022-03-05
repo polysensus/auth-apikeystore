@@ -5,6 +5,7 @@ configMapGenerator:
   - name: apikeystore
     literals:
       - APIKEYSTORE_PROJECTID=iona-1
-      - APIKEYSTORE_ADDRESS=0.0.0.0:8401
+      - APIKEYSTORE_ADDRESS1=0.0.0.0:8401
+      - APIKEYSTORE_ADDRESS2=0.0.0.0:8402
       - APIKEYSTORE_PREFIX=node/
       - APIKEYSTORE_EXCHANGEURL=http://tokenendpoint:3000/token

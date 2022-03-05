@@ -1,0 +1,53 @@
+{
+    "configurations": [
+        {
+            "name": "Run on Kubernetes",
+            "type": "cloudcode.kubernetes",
+            "request": "launch",
+            "skaffoldConfig": "${workspaceFolder:service}/../skaffold.yaml",
+            "watch": true,
+            "cleanUp": false,
+            "portForward": true,
+            "debug": [
+                {
+                    "image": "apikeystore",
+                    "log": true,
+                    "logDest": true,
+                    "logOutput": "debugger,debuglineerr,rpc,dap",
+                    "containerName": "server",
+                    "sourceFileMap": {
+                        "..": "/go",
+                        "cmd/apikeystore": "/go/service/cmd/apikeystore",
+                        "${workspaceFolder:service}/../service": "/go/service"
+                    }
+                },
+                {
+                    "image": "apikeystore",
+                    "containerName": "service",
+                    "sourceFileMap": {
+                        "..": "/go"
+                    }
+                },
+                {
+                    "image": "apikeystore",
+                    "containerName": "service",
+                    "sourceFileMap": {
+                        "..": "/go"
+                    }
+                }
+            ],
+            "imageRegistry": "eu.gcr.io/iona-1"
+        },
+        {
+            "type": "go",
+            "request": "launch",
+            "name": "Launch (local)",
+            "mode": "auto",
+            "program": "${workspaceFolder:service}/../service/",
+            "env": {
+                "APIKEYSTORE_ADDRESS1": "123.4.5.6:123"
+            },
+            "args": []
+        }
+    ]
+}

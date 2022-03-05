@@ -1,5 +1,5 @@
 {
-  display_name: "myfirstkey",
-  audience: "audience",
-  scopes: "aaa bbb ccc"
+  display_name: "a test key",
+  audience: "ethnode1",
+  scopes: "net_* eth_* admin_nodeInfo"
 }

@@ -18,7 +18,7 @@ COPY service/go.mod service/go.sum ./
 RUN go mod download
 
 
-WORKDIR /build
+WORKDIR /go
 # Copy rest of the application source code
 COPY apibin/ ./apibin/
 COPY apihttp/ ./apihttp/
@@ -26,11 +26,11 @@ COPY service/ ./service/
 
 RUN find .
 
-WORKDIR /build/service
+WORKDIR /go/service
 # Skaffold passes in debug-oriented compiler flags
 ARG SKAFFOLD_GO_GCFLAGS
 RUN echo "Go gcflags: ${SKAFFOLD_GO_GCFLAGS}"
-RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -mod=readonly -v -o /build/server cmd/apikeystore/main.go
+RUN go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -mod=readonly -v -o /go/server cmd/apikeystore/main.go
 
 # Now create separate deployment image
 FROM gcr.io/distroless/base
@@ -40,6 +40,6 @@ FROM gcr.io/distroless/base
 # See https://golang.org/pkg/runtime/
 ENV GOTRACEBACK=single
 
-WORKDIR /service
-COPY --from=build /build/server ./
-ENTRYPOINT ["/service/server"]
+WORKDIR /go
+COPY --from=build /go/server ./
+ENTRYPOINT ["/go/server"]
