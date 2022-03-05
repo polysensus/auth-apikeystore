@@ -1,7 +1,8 @@
 // APIKey handled by the user has the form
 //
-// BASE64(display_name)[:8].BASE64(id || alg || salt || secret)
-//
+// BASE64(display_name)[:8].BASE64(id).BASE64(alg.salt.secret)
+// BASE64(display_name[:16].id.alg.BASE64(salt).BASE64(secret))
+// (URL Safe BASE64)
 // This form lets the user treat it as an opaque key with personal identifier,
 // whilst internaly it is comaptible with the client_id/secret scheme requred
 // by the client credentials grant type for openid connect.

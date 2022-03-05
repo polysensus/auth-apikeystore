@@ -5,13 +5,16 @@ go 1.17
 require (
 	cloud.google.com/go/firestore v1.6.1
 	firebase.google.com/go/v4 v4.7.1
+	github.com/google/flatbuffers v2.0.6+incompatible
 	github.com/googleapis/api-linter v1.29.5
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
+	github.com/matoous/go-nanoid v1.5.0
 	github.com/robinbryce/apikeystore/apibin v0.0.0
 	github.com/robinbryce/apikeystore/apihttp v0.0.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.10.1
+	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 	google.golang.org/grpc v1.44.0
 )
 
@@ -36,7 +39,6 @@ require (
 	github.com/gertd/go-pluralize v0.1.7 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/flatbuffers v2.0.6+incompatible // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/googleapis/gax-go/v2 v2.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect

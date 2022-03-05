@@ -10,8 +10,8 @@ const (
 	space         = " "
 	algParts      = 3
 	memSuffix     = "MB"
-	maxKeyLength  = 32
-	minKeyLength  = 32
+	maxKeyLength  = 64
+	minKeyLength  = 16
 	maxMem        = 64
 	minMem        = 16
 	maxTime       = 5
@@ -26,6 +26,7 @@ type ParamsArgon2ID struct {
 }
 
 type Alg struct {
+	String string
 	ParamsArgon2ID
 }
 
@@ -33,13 +34,15 @@ func ParseAlg(alg string) (Alg, error) {
 	if !strings.HasPrefix(alg, argon2idAlgID) {
 		return Alg{}, fmt.Errorf("missing or unsupportred algorithm name `%s'", alg)
 	}
+
+	a := Alg{String: alg}
+
 	alg = alg[len(argon2idAlgID):]
 
 	parts := strings.SplitN(alg, space, algParts)
 	if len(parts) != 3 {
 		return Alg{}, fmt.Errorf("bad alg string `%s'", alg)
 	}
-	a := Alg{}
 	u, err := strconv.ParseUint(parts[0], 10, 32)
 	if err != nil {
 		return Alg{}, fmt.Errorf("bad times component `%s': %v", parts[0], err)
