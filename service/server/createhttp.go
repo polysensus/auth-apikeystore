@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/robinbryce/apikeystore/service/keys"
 )
 
 func (a *APIKeyCreator) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -19,9 +17,9 @@ func (a *APIKeyCreator) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var data map[string]string
+	var body map[string]string
 
-	err := json.NewDecoder(r.Body).Decode(&data)
+	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("decoding json payload: %v", err), http.StatusBadRequest)
 		return
@@ -29,28 +27,28 @@ func (a *APIKeyCreator) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	aud := data["aud"]
-	scopes := data["scopes"]
-	name := data["display_name"]
+	aud := body["aud"]
+	scopes := body["scopes"]
+	name := body["display_name"]
 
-	var opts []keys.APIKeyOption
-	if name != "" {
-		opts = append(opts, keys.WithDisplayName(name))
-	}
+	// XXX: TODO allow/deny scopes based on user id in jwt on bearer token used to
+	// access this endpoint
 
-	apikey, err := a.create(ctx, aud, scopes, opts...)
+	rec, apikey, err := a.create(ctx, name, aud, scopes)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("error creating key: %v", err.Error()), http.StatusBadRequest)
 		return
 	}
 
-	// XXX: TODO allow/deny scopes based on user id in jwt on bearer token used to
-	// access this endpoint
-	json.NewEncoder(w).Encode(map[string]string{
-		"apikey": apikey,
-		"aud":    aud,
-		"scopes": scopes,
-	})
+	resp := struct {
+		APIKey string `json:"apikey"`
+		ClientRecord
+	}{
+		ClientRecord: rec,
+		APIKey:       apikey,
+	}
+
+	json.NewEncoder(w).Encode(resp)
 
 	w.WriteHeader(http.StatusOK)
 }

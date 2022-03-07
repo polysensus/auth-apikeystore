@@ -3,7 +3,8 @@ name: apikeystore
 usage: conveniences and ergonomics for apikeystore
 options:
   address1:
-    default: "http://127.0.0.1:8401"
+    default: "https://iona.thaumagen.io/apikeystore"
+    #default: "http://127.0.0.1:8401"
   address2:
     default: "http://127.0.0.1:8401"
   service:
@@ -14,10 +15,13 @@ options:
     type: bool
     default: false
     short: "v"
-  noverify:
+  verify:
     type: bool
     default: false
-    short: "k"
+    short: "K"
+  launchdir:
+    default:
+      command: echo $PWD
 
 tasks:
 
@@ -30,18 +34,38 @@ tasks:
       aud:
         default: "test audience"
       scopes:
-        default: "eth_* net_* admin_nodeInfo"
+        default: "rpc://eth_* rpc://net_* rpc://admin_nodeInfo"
     run:
       - command:
           exec: |
             set -e
-            curl \
+            OUTPUT=$(curl $(! ${verbose} && echo "-s") \
              $(${verbose} && echo "-v") \
-             $(${noverify} && echo "-k") \
+             $(${verify} || echo "-k") \
              -H "Content-Type: application/json" \
              -d '{"display_name":"${display_name}","aud":"${aud}","scopes":"${scopes}"}' \
-                ${address1}/node/keys
-  access:
+                ${address1}/clients)
+
+            ! ${verbose} && echo -n "$OUTPUT" | jq -r .apikey && exit 0
+            echo $OUTPUT
+
+  get:
+    args:
+      client_id:
+    run:
+      - command:
+          exec: |
+            set -e
+            OUTPUT=$(curl $(! ${verbose} && echo "-s") \
+             $(${verbose} && echo "-v") \
+             $(${verify} || echo "-k") \
+             -H "Content-Type: application/json" \
+                ${address1}/clients/${client_id})
+
+            ! ${verbose} && echo -n "$OUTPUT" | jq -r . && exit 0
+            echo $OUTPUT
+
+  authz:
     args:
       key:
     run:
@@ -51,7 +75,7 @@ tasks:
             curl \
              $(${verbose} && echo "-v") \
              $(${noverify} && echo "-k") \
-                ${address1}/node/access/${key}
+                ${address1}/access/${key}
 
   create2:
     options:

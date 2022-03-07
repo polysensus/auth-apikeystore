@@ -8,6 +8,9 @@ import (
 	firebase "firebase.google.com/go/v4"
 )
 
+type logger interface {
+	Printf(format string, v ...interface{})
+}
 type APIKeyHandler struct {
 	cfg      *Config
 	log      logger

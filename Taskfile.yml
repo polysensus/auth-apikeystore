@@ -257,11 +257,6 @@ tasks:
           done
         done
 
-        exit 0
-        skaffold delete \
-            ${CONTEXT:+--kube-context ${CONTEXT}} \
-            ${NAMESPACE:+-n $NAMESPACE}
-
   pf-reader:
     desc: 'port forward to ${APPNAME}-reader'
     cmds:

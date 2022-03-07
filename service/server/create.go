@@ -2,16 +2,18 @@ package server
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"time"
 
+	"github.com/robinbryce/apikeys"
 	"github.com/robinbryce/apikeystore/apibin"
-	"github.com/robinbryce/apikeystore/service/keys"
 )
 
 const (
 	defaultDBTimeout  = time.Second * 30
-	apiKeysCollection = "apikeys"
+	apiKeysCollection = "apiclients"
 	apiKeyRouteVar    = "apikey"
 )
 
@@ -26,51 +28,82 @@ func NewAPIKeyCreator(cfg *Config) APIKeyCreator {
 	}
 }
 
+type ClientRecord struct {
+	apikeys.Key
+	DisplayName string `firestore:"display_name"`
+	Audience    string `firestore:"aud"`
+	Scope       string `firestore:"scope"`
+}
+
+// MarshalJSON ensures that derived_key is marshaled as url safe form for consistency with how the parts of the apikeys are serialized
+func (cr *ClientRecord) MarshalJSON() ([]byte, error) {
+	type Alias ClientRecord
+	return json.Marshal(&struct {
+		DerivedKey string `json:"derived_key"`
+		*Alias
+	}{
+		DerivedKey: cr.EncodedKey(),
+		Alias:      (*Alias)(cr),
+	})
+}
+
+func (cr *ClientRecord) UnmarshalJSON(data []byte) error {
+	type Alias ClientRecord
+	aux := &struct {
+		DerivedKey string `json:"derived_key"`
+		*Alias
+	}{
+		Alias: (*Alias)(cr),
+	}
+
+	var err error
+	if err = json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	cr.DerivedKey, err = base64.URLEncoding.DecodeString(aux.DerivedKey)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (a *APIKeyCreator) create(
-	ctx context.Context, aud, scopes string, opts ...keys.APIKeyOption) (string, error) {
+	ctx context.Context, displayName, aud, scopes string, opts ...apikeys.KeyOption) (ClientRecord, string, error) {
 
 	ctx, cancel := context.WithTimeout(ctx, defaultDBTimeout)
 	defer cancel()
 
 	if err := a.EnsureConnected(ctx); err != nil {
-		return "", fmt.Errorf("failed to connect to storage: %w", err)
+		return ClientRecord{}, "", fmt.Errorf("failed to connect to storage: %w", err)
 	}
 
-	data := struct {
-		keys.APIKey
-		Audience string `firestore:"aud"`
-		Scopes   string `firestore:"scopes"`
-	}{
-		Audience: aud,
-		Scopes:   scopes,
+	rec := ClientRecord{
+		DisplayName: displayName,
+		Audience:    aud,
+		Scope:       scopes,
 	}
-	err := data.SetOptions(keys.StandardAlg, opts...)
+	err := rec.SetOptions(apikeys.StandardAlg, opts...)
 	if err != nil {
 		a.log.Printf("error initialising key parameter: %v", err)
-		return "", err
+		return ClientRecord{}, "", err
 	}
 
-	a.log.Printf("display_name: %s\n", data.DisplayName)
-	a.log.Printf("audience: %s\n", data.Audience)
-	a.log.Printf("scopes: %s\n", data.Scopes)
-
-	apikey, err := data.Generate()
+	apikey, err := rec.Generate()
 	if err != nil {
 		a.log.Printf("error generating key: %v", err)
-		return "", err
+		return ClientRecord{}, "", err
 	}
 
-	// Save the derived key and details in firebase first. The derived key *is*
-	// the database primary key (the passwords are properly salted)
-	ref := a.db.Collection(apiKeysCollection).Doc(data.EncodedKey())
+	// Use the client_id as the primary key
+	ref := a.db.Collection(apiKeysCollection).Doc(rec.ClientID)
 
 	// As we just generated this key its essentially impossible for it already
 	// to exist unless our key generation is broken - in which case we want to
 	// error out.
-	_, err = ref.Create(ctx, data)
+	_, err = ref.Create(ctx, rec)
 	if err != nil {
 		a.log.Printf("error storing derived key: %v", err)
-		return "", err
+		return ClientRecord{}, "", err
 	}
-	return apikey, nil
+	return rec, apikey, nil
 }

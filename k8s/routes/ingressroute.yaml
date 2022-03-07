@@ -17,14 +17,15 @@ spec:
           scheme: http
           port: http
       middlewares:
-        - name: strip-ingressroute-prefix
+        - name: apikeystore-strip-ingressroute-prefix
     - match: PathPrefix(`/apikeystore/`) && Method(`POST`, `PUT`, `PATCH`, `DELETE`)
       kind: Rule
       services:
         - kind: Service
           name: apikeystore-writer
           scheme: http
-          port: http2
+          port: http
+          # port: http2
       middlewares:
         - name: apikeystore-strip-ingressroute-prefix
 

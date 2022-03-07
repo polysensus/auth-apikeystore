@@ -62,7 +62,8 @@ func NewConfig() Config {
 type Server struct {
 	ConfigFileDir string
 	cfg           *Config
-	writer        APIKeyCreator
+	clientwriter  APIKeyCreator
+	clients       ClientCollection
 	authz         APIKeyAuthz
 }
 
@@ -80,7 +81,8 @@ func NewServer(
 		opt(&s)
 	}
 
-	s.writer = NewAPIKeyCreator(s.cfg)
+	s.clientwriter = NewAPIKeyCreator(s.cfg)
+	s.clients = NewClientCollection(s.cfg)
 	s.authz = NewAPIKeyAuthz(s.cfg)
 	return s, nil
 }
@@ -107,7 +109,7 @@ func (s *Server) serveGRPC() (func(), func()) {
 	}
 
 	server := grpc.NewServer(grpc.CustomCodec(flatbuffers.FlatbuffersCodec{}))
-	apibin.RegisterAPIKeyStoreServer(server, &s.writer)
+	apibin.RegisterAPIKeyStoreServer(server, &s.clientwriter)
 	serve := func() {
 		if err := server.Serve(listener); err != nil {
 			log.Fatalf("failed to start grpc server: %v", err)
@@ -129,8 +131,9 @@ func (s *Server) serveHTTP(root *mux.Router) (func(), func()) {
 	}
 
 	r := root.PathPrefix(path).Subrouter()
-	r.Handle("/access/{apikey}", &s.authz).Methods("GET")
-	r.Handle("/keys", &s.writer).Methods("POST", "PUT", "PATCH")
+	r.Handle("/clients", &s.clientwriter).Methods("POST", "PUT", "PATCH")
+	r.Handle("/clients/{client_id}", &s.clients).Methods("GET")
+	r.Handle("/authz/{apikey}", &s.authz).Methods("GET")
 
 	logged := handlers.LoggingHandler(os.Stdout, root)
 	srv := &http.Server{

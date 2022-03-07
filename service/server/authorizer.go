@@ -9,9 +9,15 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/robinbryce/apikeystore/service/keys"
+	"github.com/robinbryce/apikeys"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+)
+
+const (
+	keyField   = "derived_key"
+	audField   = "aud"
+	scopeField = "scope"
 )
 
 type APIKeyAuthz struct {
@@ -37,7 +43,7 @@ func (a *APIKeyAuthz) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ak, password, err := keys.Decode(apikey)
+	ak, password, err := apikeys.Decode(apikey)
 	if err != nil {
 		a.log.Printf("error decoding apikey: %v", err)
 		http.Error(w, "invalid api key", http.StatusForbidden)
@@ -56,7 +62,7 @@ func (a *APIKeyAuthz) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ref := a.db.Collection(apiKeysCollection).Doc(encodedKey)
+	ref := a.db.Collection(apiKeysCollection).Doc(ak.ClientID)
 	doc, err := ref.Get(ctx)
 	if err != nil {
 		if status.Code(err) != codes.NotFound {
@@ -68,28 +74,10 @@ func (a *APIKeyAuthz) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := doc.Data()
-	i, ok := data["aud"]
-	aud, ok2 := i.(string)
-	if !(ok && ok2) {
-		a.log.Printf("error reading key `%s': aud missing: %v", encodedKey, data)
-		http.Error(w, "aud missing from record", http.StatusForbidden)
-		return
-	}
-
-	i, ok = data["scopes"]
-	scopes, ok2 := i.(string)
-	if !(ok && ok2) {
-		a.log.Printf("error reading key `%s': scopes missing: %v", encodedKey, data)
-		http.Error(w, "scopes missing from record", http.StatusForbidden)
-		return
-	}
-
-	// Checking the key here is just a data consistency check. as the derived
-	// key is also the database key, the records presence is authorative.
-	i, ok = data["key"]
+	i, ok := data[keyField]
 	storedKey, ok2 := i.([]byte)
 	if !(ok && ok2) {
-		a.log.Printf("error reading key `%s': key missing: %v", encodedKey, data)
+		a.log.Printf("error reading key `%s': `%s' missing: %v", encodedKey, keyField, data)
 		http.Error(w, "key missing from record", http.StatusForbidden)
 		return
 	}
@@ -97,12 +85,28 @@ func (a *APIKeyAuthz) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// treat any discrepancy with the stored record as forbidden
 		a.log.Printf("error stored key `%s' != reovered key`%s': %v", storedKey, key, data)
 		http.Error(w, "corrupt key record", http.StatusForbidden)
-
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{
-		"aud":    aud,
-		"scopes": scopes,
+	i, ok = data[audField]
+	aud, ok2 := i.(string)
+	if !(ok && ok2) {
+		a.log.Printf("error reading key `%s': `%s' missing: %v", encodedKey, audField, data)
+		http.Error(w, "aud missing from record", http.StatusForbidden)
+		return
+	}
+
+	i, ok = data[scopeField]
+	scopes, ok2 := i.(string)
+	if !(ok && ok2) {
+		a.log.Printf("error reading key `%s': `%s' missing: %v", encodedKey, scopeField, data)
+		http.Error(w, "scopes missing from record", http.StatusForbidden)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"client_id": ak.ClientID,
+		"aud":       aud,
+		"scope":     scopes,
 	})
 
 	w.WriteHeader(http.StatusOK)
