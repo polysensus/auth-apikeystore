@@ -101,7 +101,7 @@ tasks:
           --grpc-gateway_out=logtostderr=true,$PATHS_OPTS:$OUTDIR \
           api/*.proto
     vars:
-      PROTOC_IMAGE: '{{.PROTOC_IMAGE | default "eu.gcr.io/iona-1/protoc:protoc-latest"}}'
+      PROTOC_IMAGE: '{{.PROTOC_IMAGE | default "eu.gcr.io/iona-1/protoc:main-latest"}}'
 
   generate-apibin:
     cmds:
