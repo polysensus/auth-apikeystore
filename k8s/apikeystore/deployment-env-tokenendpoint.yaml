@@ -24,12 +24,12 @@ spec:
           - name: APIKEYSTORE_CLIENTID
             valueFrom:
               secretKeyRef:
-                name: apikeystore-tokenendpoint-clientid-secret
+                name: tokenendpoint-clientid-secret
                 key: CLIENT_ID
 
           - name: APIKEYSTORE_CLIENTSECRET
             valueFrom:
               secretKeyRef:
-                name: apikeystore-tokenendpoint-clientid-secret
+                name: tokenendpoint-clientid-secret
                 key: CLIENT_SECRET
 
