@@ -281,11 +281,13 @@ tasks:
       - |
         [ -z "$PROFILE" ] && PROFILE={{.PROFILE}}
         [ -z "$TAG" ] && TAG={{.TAG}}
+        FILE_OUTPUT=""
+        [ -d $(dirname {{.BUILD_ARTIFACTS}}) ] FILE_OUTPUT="--file-output {{.BUILD_ARTIFACTS}}"
 
         skaffold build \
           ${PROFILE:+-p $PROFILE} \
           ${TAG:+-t $TAG} \
-          --file-output {{.BUILD_ARTIFACTS}}
+          $FILE_OUTPUT
     vars:
       TAG: '{{.TAG | default "main-latest" }}'
       PROFILE: '{{.PROFILE | default ""}}'
