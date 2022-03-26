@@ -48,7 +48,7 @@ jobs:
       - name: Build and publish container image with tag
         run: |
             export SKAFFOLD_DEFAULT_REPO=eu.gcr.io/iona-1
-            TAG=${BUILD_ID} task cd-build
+            task cd-build TAG=${BUILD_ID}
 
         #uses: docker/build-push-action@v2
         #with:
