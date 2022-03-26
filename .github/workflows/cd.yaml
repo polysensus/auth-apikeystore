@@ -13,6 +13,8 @@ jobs:
         with:
           version: 3.x
       - uses: 'hiberbee/github-action-skaffold@1.12.0'
+        with:
+          skaffold-version: 1.37.0
 
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
