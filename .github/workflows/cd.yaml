@@ -41,6 +41,7 @@ jobs:
             sha=${GITHUB_SHA::8}
             calver=$(date +%g.%m%d).${{ github.run_number }}
             buildno=${{ github.run_number }}
+            echo "branch: $branch, sha: $sha, buildno: $buildno"
 
             # echo "::set-output name=BUILD_ID::${branch}-${sha}-${calver}"
             echo "::set-output name=BUILD_ID::${branch}-${buildno}"
