@@ -3,7 +3,7 @@ name: apikeystore
 usage: conveniences and ergonomics for apikeystore
 options:
   address1:
-    default: "https://iona.thaumagen.io/apikeystore"
+    default: "https://iona.thaumagen.io/stage/apikeystore"
     #default: "http://127.0.0.1:8401"
   address2:
     default: "http://127.0.0.1:8401"
@@ -29,7 +29,7 @@ tasks:
     options:
       display_name:
         default:
-          command: echo $USER
+          command: echo $USER-$(date +%Y%m%d.%s)
         short: "n"
       aud:
         default: "test audience"
