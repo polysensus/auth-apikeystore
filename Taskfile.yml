@@ -8,8 +8,6 @@ env:
   # This override is provided so that the generate task can be used to
   # quick start consumers of this repository with useful defaults.
   K8S_GENERATE_DIR: '{{.K8S_GENERATE_DIR | default "k8s/tmp"}}'
-  DESTDIR: '{{.DESTDIR | default "."}}'
-  PROTOC_IMAGE: '{{.PROTOC_IMAGE | default "eu.gcr.io/iona-1/protoc:protoc-latest"}}'
 
 vars:
   BUILD_ARTIFACTS: k8s/tmp/skaffold/build-artifacts.json
@@ -92,6 +90,8 @@ tasks:
     cmds:
       - |
         OUTDIR=.
+        [ -z "$PROTOC_IMAGE" ] && PROTOC_IMAGE={{.PROTOC_IMAGE}}
+
         PATHS_OPTS="module=github.com/robinbryce/apikeystore,paths=import"
         docker run --rm -v $(pwd):$(pwd) -w $(pwd) -u $(id -u):$(id -g) $PROTOC_IMAGE \
           --go_out=$PATHS_OPTS:$OUTDIR \
@@ -100,12 +100,15 @@ tasks:
           --openapiv2_out=logtostderr=true,json_names_for_fields=false:$OUTDIR \
           --grpc-gateway_out=logtostderr=true,$PATHS_OPTS:$OUTDIR \
           api/*.proto
+    vars:
+      PROTOC_IMAGE: '{{.PROTOC_IMAGE | default "eu.gcr.io/iona-1/protoc:protoc-latest"}}'
 
   generate-apibin:
     cmds:
       - |
         OUTDIR=.
-        docker run --rm -v $(pwd):$(pwd) -w $(pwd) -u $(id -u):$(id -g) neomantra/flatbuffers flatc \
+        [ -z "$FLATBUFFERS_IMAGE" ] && FLATBUFFERS_IMAGE={{.FLATBUFFERS_IMAGE}}
+        docker run --rm -v $(pwd):$(pwd) -w $(pwd) -u $(id -u):$(id -g) $FLATBUFFERS_IMAGE flatc \
          -o $OUTDIR \
         --go --grpc --gen-object-api \
         --go-namespace apibin \
@@ -117,6 +120,8 @@ tasks:
         #  OURDIR/go-namespace if --go-namespace is set. But grpc go files are
         #  *always* put in OUTDIR/namespace where namespace is declared in the
         #  fbs file. If it isn't declared the just go in OUTDIR
+    vars:
+      FLATBUFFERS_IMAGE: '{{.FLATBUFFERS_IMAGE | default "neomantra/flatbuffers"}}'
 
   generate-api:
     deps: [generate-apihttp, generate-apibin]
@@ -218,23 +223,7 @@ tasks:
       CLIENTID_SECRET_FILE: '{{.CLIENTID_SECRET_FILE | default "k8s/tmp/dev/clientidsecret.env"}}'
       INGRESS_PREFIX:
 
-  cd-build:
-    desc: 'build and push the images (intended for github workflow cd)'
-    cmds:
-      - task: generate-build
-      - task: build
-    env:
-      TAG: "{{.TAG}}"
-
-  build:
-    desc: 'build the images'
-    cmds:
-      - |
-        skaffold build \
-          ${PROFILE:+-p $PROFILE} \
-          ${TAG:+-t $TAG} \
-          --file-output {{.BUILD_ARTIFACTS}}
-
+  # deployment and operations ---
   deploy:
     desc: 'deploy the app using skaffold'
     precondition:
@@ -284,3 +273,25 @@ tasks:
         echo $POD
         # {{.KUBECTL}} -n {{.N}} port-forward --address localhost pod/$POD 8080
         $KUBECTL -n $NAMESPACE logs $POD {{.CLI_ARGS}}
+
+  # build & cd/cd ---
+  build:
+    desc: 'build the images'
+    cmds:
+      - |
+        [ -z "$PROFILE" ] && PROFILE={{.PROFILE}}
+        [ -z "$TAG" ] && TAG={{.TAG}}
+
+        skaffold build \
+          ${PROFILE:+-p $PROFILE} \
+          ${TAG:+-t $TAG} \
+          --file-output {{.BUILD_ARTIFACTS}}
+    vars:
+      TAG: '{{.TAG | default "main-latest" }}'
+      PROFILE: '{{.PROFILE | default ""}}'
+
+  cd-build:
+    desc: 'build and push the images (intended for github workflow cd)'
+    cmds:
+      - task: generate-build
+      - task: build
