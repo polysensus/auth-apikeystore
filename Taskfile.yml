@@ -218,6 +218,14 @@ tasks:
       CLIENTID_SECRET_FILE: '{{.CLIENTID_SECRET_FILE | default "k8s/tmp/dev/clientidsecret.env"}}'
       INGRESS_PREFIX:
 
+  cd-build:
+    desc: 'build and push the images (intended for github workflow cd)'
+    cmds:
+      - task: generate-build
+      - task: build
+    env:
+      TAG: "{{.TAG}}"
+
   build:
     desc: 'build the images'
     cmds:

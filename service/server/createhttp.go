@@ -1,3 +1,4 @@
+//+build:apihttp
 package server
 
 import (

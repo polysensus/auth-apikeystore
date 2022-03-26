@@ -9,6 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: 'actions/checkout@v3'
+      - uses: 'arduino/setup-task@v1'
+        with:
+          version: 2.x
+      - uses: 'hiberbee/github-action-skaffold@1.12.0'
 
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
@@ -40,6 +44,10 @@ jobs:
             echo "::set-output name=BUILD_ID::${branch}-${buildno}"
 
       - name: Build and publish container image with tag
+        run: |
+            export SKAFFOLD_DEFAULT_REPO=eu.gcr.io/iona-1
+            TAG=${BUILD_ID} task cd-build
+
         uses: docker/build-push-action@v2
         with:
           push: true
