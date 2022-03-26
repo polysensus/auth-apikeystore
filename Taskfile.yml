@@ -282,7 +282,7 @@ tasks:
         [ -z "$PROFILE" ] && PROFILE={{.PROFILE}}
         [ -z "$TAG" ] && TAG={{.TAG}}
         FILE_OUTPUT=""
-        [ -d $(dirname {{.BUILD_ARTIFACTS}}) ] FILE_OUTPUT="--file-output {{.BUILD_ARTIFACTS}}"
+        [ -d $(dirname {{.BUILD_ARTIFACTS}}) ] && FILE_OUTPUT="--file-output {{.BUILD_ARTIFACTS}}"
 
         skaffold build \
           ${PROFILE:+-p $PROFILE} \
