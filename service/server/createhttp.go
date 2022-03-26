@@ -50,6 +50,4 @@ func (a *APIKeyCreator) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(resp)
-
-	w.WriteHeader(http.StatusOK)
 }
