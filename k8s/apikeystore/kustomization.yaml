@@ -1,6 +1,12 @@
+commonLabels:
+  app: apikeystore
 resources:
   - deployment.yaml
   - service.yaml
+patchesStrategicMerge:
+  - deployment-serviceaccount.yaml
+  - deployment-env.yaml
+  - deployment-env-tokenendpoint.yaml
 configMapGenerator:
   - name: apikeystore
     literals:

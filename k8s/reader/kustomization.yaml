@@ -1,8 +1,0 @@
-nameSuffix: -reader
-commonLabels:
-  app: apikeystore-reader
-resources:
-  - ./../apikeystore
-patchesStrategicMerge:
-  - deployment-serviceaccount.yaml
-  - deployment-env-tokenendpoint.yaml
