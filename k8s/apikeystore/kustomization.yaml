@@ -3,6 +3,7 @@ commonLabels:
 resources:
   - deployment.yaml
   - service.yaml
+  - routes.yaml
 patchesStrategicMerge:
   - deployment-serviceaccount.yaml
   - deployment-env.yaml
