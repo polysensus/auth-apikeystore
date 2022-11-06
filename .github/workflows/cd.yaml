@@ -21,12 +21,12 @@ jobs:
         uses: 'google-github-actions/auth@v0'
         with:
           token_format: 'access_token'
-          workload_identity_provider: 'projects/871349271977/locations/global/workloadIdentityPools/github-oidc-1/providers/github-provider'
-          service_account: 'gha-cd-apikeystore@iona-1.iam.gserviceaccount.com'
+          workload_identity_provider: 'projects/723759996909/locations/global/workloadIdentityPools/github-oidc-1/providers/github-provider'
+          service_account: 'gha-cd-auth-apikeystore@hoy-dev-1.iam.gserviceaccount.com'
 
       - uses: 'docker/login-action@v1'
         with:
-          registry: 'eu.gcr.io/iona-1' # or REGION-docker.pkg.dev
+          registry: 'eu.gcr.io/hoy-1' # or REGION-docker.pkg.dev
           username: 'oauth2accesstoken'
           password: '${{ steps.auth.outputs.access_token }}'
 
