@@ -6,16 +6,16 @@ WORKDIR /go/apibin
 
 # Install dependencies in go.mod and go.sum
 COPY apibin/go.mod ./
-RUN go mod download
+RUN go mod download && go mod tidy
 
 
 WORKDIR /go/apihttp
 COPY apihttp/go.mod ./
-RUN go mod download
+RUN go mod download && go mod tidy
 
 WORKDIR /go/service
 COPY service/go.mod ./
-RUN go mod download
+RUN go mod download && go mod tidy
 
 
 WORKDIR /go
