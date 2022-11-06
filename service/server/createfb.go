@@ -4,7 +4,7 @@ import (
 	"context"
 
 	flatbuffers "github.com/google/flatbuffers/go"
-	"github.com/robinbryce/apikeystore/apibin"
+	"github.com/polysensus/auth-apikeystore/apibin"
 )
 
 func (a *APIKeyCreator) Create(

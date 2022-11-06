@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/robinbryce/apikeystore/service/server"
+	"github.com/polysensus/auth-apikeystore/service/server"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )

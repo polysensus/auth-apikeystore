@@ -31,7 +31,7 @@ jobs:
           password: '${{ steps.auth.outputs.access_token }}'
 
       - run: |-
-          echo '${{ steps.auth.outputs.access_token }}' | docker login -u oauth2accesstoken --password-stdin https://eu.gcr.io/iona-1
+          echo '${{ steps.auth.outputs.access_token }}' | docker login -u oauth2accesstoken --password-stdin https://eu.gcr.io/hoy-dev-1
 
 
       - id: build_id
@@ -48,11 +48,11 @@ jobs:
 
       - name: Build and publish container image with tag
         run: |
-            export SKAFFOLD_DEFAULT_REPO=eu.gcr.io/iona-1
+            export SKAFFOLD_DEFAULT_REPO=eu.gcr.io/hoy-dev-1
             task cd-build TAG=${{ steps.build_id.outputs.BUILD_ID }}
 
         #uses: docker/build-push-action@v2
         #with:
         #  push: true
         #  context: .
-        #  tags: eu.gcr.io/iona-1/apikeystore:${{ steps.build_id.outputs.BUILD_ID }}
+        #  tags: eu.gcr.io/hoy-1/auth-apikeystore:${{ steps.build_id.outputs.BUILD_ID }}

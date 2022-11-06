@@ -6,7 +6,7 @@ import (
 	"os"
 
 	flatbuffers "github.com/google/flatbuffers/go"
-	"github.com/robinbryce/apikeystore/apibin"
+	"github.com/polysensus/auth-apikeystore/apibin"
 
 	// "google.golang.org/grpc"
 	"github.com/spf13/pflag"

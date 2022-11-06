@@ -36,7 +36,7 @@
                     }
                 }
             ],
-            "imageRegistry": "eu.gcr.io/iona-1"
+            "imageRegistry": "eu.gcr.io/hoy-1"
         },
         {
             "type": "go",

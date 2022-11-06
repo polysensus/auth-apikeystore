@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/robinbryce/apikeys"
-	"github.com/robinbryce/apikeystore/apibin"
+	"github.com/polysensus/auth-apikeystore/apibin"
 )
 
 const (

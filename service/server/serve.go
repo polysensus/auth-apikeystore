@@ -16,7 +16,7 @@ import (
 	flatbuffers "github.com/google/flatbuffers/go"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/robinbryce/apikeystore/apibin"
+	"github.com/polysensus/auth-apikeystore/apibin"
 	"google.golang.org/grpc"
 )
 

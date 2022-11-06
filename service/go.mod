@@ -1,4 +1,4 @@
-module github.com/robinbryce/apikeystore/service
+module github.com/polysensus/auth-apikeystore/service
 
 go 1.17
 
@@ -9,17 +9,16 @@ require (
 	github.com/googleapis/api-linter v1.29.5
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
+	github.com/polysensus/auth-apikeystore/apibin v0.0.0
 	github.com/robinbryce/apikeys v0.0.5
-	github.com/robinbryce/apikeystore/apibin v0.0.0
-	github.com/robinbryce/apikeystore/apihttp v0.0.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.10.1
 	google.golang.org/grpc v1.44.0
 )
 
 replace (
-	github.com/robinbryce/apikeystore/apibin => ../apibin
-	github.com/robinbryce/apikeystore/apihttp => ../apihttp
+	github.com/polysensus/auth-apikeystore/apibin => ../apibin
+	github.com/polysensus/auth-apikeystore/apihttp => ../apihttp
 )
 
 require (

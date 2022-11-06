@@ -1,4 +1,4 @@
-module github.com/robinbryce/apikeystore/apihttp
+module github.com/polysensus/auth-apikeystore/apihttp
 
 go 1.17
 

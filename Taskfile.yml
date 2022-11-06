@@ -64,7 +64,7 @@ tasks:
         # go install github.com/googleapis/api-linter/cmd/api-linter
 
     env:
-      ORGANISATION: '{{.ORGANISATION | default "thaumagen"}}'
+      ORGANISATION: '{{.ORGANISATION | default "polysensus"}}'
       TLD: '{{.TLD | default "io"}}'
       HOST: ''
       DOMAIN: ''
@@ -92,7 +92,7 @@ tasks:
         OUTDIR=.
         [ -z "$PROTOC_IMAGE" ] && PROTOC_IMAGE={{.PROTOC_IMAGE}}
 
-        PATHS_OPTS="module=github.com/robinbryce/apikeystore,paths=import"
+        PATHS_OPTS="module=github.com/polysensus/auth-apikeystore,paths=import"
         docker run --rm -v $(pwd):$(pwd) -w $(pwd) -u $(id -u):$(id -g) $PROTOC_IMAGE \
           --go_out=$PATHS_OPTS:$OUTDIR \
           --go-grpc_out=$PATHS_OPTS:$OUTDIR \
@@ -101,7 +101,7 @@ tasks:
           --grpc-gateway_out=logtostderr=true,$PATHS_OPTS:$OUTDIR \
           api/*.proto
     vars:
-      PROTOC_IMAGE: '{{.PROTOC_IMAGE | default "eu.gcr.io/iona-1/protoc:main-latest"}}'
+      PROTOC_IMAGE: '{{.PROTOC_IMAGE | default "eu.gcr.io/hoy-dev-1/protoc:main-latest"}}'
 
   generate-apibin:
     cmds:

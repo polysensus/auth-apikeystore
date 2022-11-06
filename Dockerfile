@@ -2,19 +2,19 @@
 # Use base golang image from Docker Hub
 FROM golang:1.17 as build
 
-WORKDIR /build/apibin
+WORKDIR /go/apibin
 
 # Install dependencies in go.mod and go.sum
-COPY apibin/go.mod apibin/go.sum ./
+COPY apibin/go.mod ./
 RUN go mod download
 
 
-WORKDIR /build/apihttp
-COPY apihttp/go.mod apihttp/go.sum ./
+WORKDIR /go/apihttp
+COPY apihttp/go.mod ./
 RUN go mod download
 
-WORKDIR /build/service
-COPY service/go.mod service/go.sum ./
+WORKDIR /go/service
+COPY service/go.mod ./
 RUN go mod download
 
 
