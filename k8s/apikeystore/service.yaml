@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: apikeystore
+  name: auth-apikeystore
 spec:
   clusterIP: None
   selector:
-    app: apikeystore
+    app: auth-apikeystore
   ports:
     - name: http
       port: 80

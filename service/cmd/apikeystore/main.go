@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Name = "apikeystore"
+	Name = "auth-apikeystore"
 )
 
 func main() {

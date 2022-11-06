@@ -11,14 +11,14 @@
       "portForward": true,
       "debug": [
         {
-          "image": "apikeystore",
+          "image": "auth-apikeystore",
           "containerName": "server",
           "sourceFileMap": {
             "${workspaceFolder}/go": "/apikeystore"
           }
         },
         {
-          "image": "apikeystore",
+          "image": "auth-apikeystore",
           "containerName": "service",
           "sourceFileMap": {
             "${workspaceFolder}/go": "/apikeystore"

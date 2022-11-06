@@ -35,7 +35,7 @@ tasks:
 
         CONTEXT=${CONTEXT:-$(kubectl config current-context)}
         CLUSTER=$(kubectl config get-contexts ${CONTEXT} --no-headers=true | tr -s ' ' | cut -d ' ' -f3)
-        SKAFFOLD_DEFAULT_REPO=${SKAFFOLD_DEFAULT_REPO:-eu.gcr.io/${CONTEXT}}
+        SKAFFOLD_DEFAULT_REPO=${SKAFFOLD_DEFAULT_REPO:-eu.gcr.io/hoy-dev-1}
         CONTEXT_NAMESPACE=${CONTEXT_NAMESPACE:-$(echo ${CONTEXT} | cut -d '-' -f1)}
         FQDN=${FQDN:-"${CONTEXT_NAMESPACE}.${DOMAIN}"}
         HOST=${HOST:-"http://${CONTEXT_NAMESPACE}.${ORGANISATION}.${TLD}"}
@@ -191,13 +191,13 @@ tasks:
           - ./../../writer
           - ./../../routes
         secretGenerator:
-          - name: apikeystore-tokenendpoint-clientid-secret
+          - name: auth-apikeystore-auth-tokenexchange-clientid-secret
             envs:
               - clientidsecret.env
         patchesJson6902:
           - target:
               kind: IngressRoute
-              name: apikeystore
+              name: auth-apikeystore
             path: patch-ingressroute.yaml
         EOF
 
@@ -234,7 +234,7 @@ tasks:
         skaffold deploy \
             ${CONTEXT:+--kube-context ${CONTEXT}} \
             ${NAMESPACE:+-n $NAMESPACE} \
-            --label=user-deploy=$USER-apikeystore \
+            --label=user-deploy=$USER-auth-apikeystore \
             --build-artifacts {{.BUILD_ARTIFACTS}}
 
   down:
@@ -245,7 +245,7 @@ tasks:
         for resource in $(kubectl api-resources --verbs=list --namespaced -o name); do
           for target in $(kubectl get \
             --show-kind \
-            -l user-deploy=$USER-apikeystore \
+            -l user-deploy=$USER-auth-apikeystore \
             --ignore-not-found \
             -n $NAMESPACE \
             -o name ${resource} 2> /dev/null); do

@@ -6,20 +6,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: apikeystore
+  name: auth-apikeystore
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: apikeystore
+      app: auth-apikeystore
   template:
     metadata:
       labels:
-        app: apikeystore
+        app: auth-apikeystore
     spec:
       containers:
         - name: service
-          image: apikeystore
+          image: auth-apikeystore
           ports:
             - containerPort: 8401
             - containerPort: 8402
@@ -28,25 +28,25 @@ spec:
             - name: APIKEYSTORE_ADDRESS1
               valueFrom:
                 configMapKeyRef:
-                  name: apikeystore
+                  name: auth-apikeystore
                   key: APIKEYSTORE_ADDRESS1
             - name: APIKEYSTORE_ADDRESS2
               valueFrom:
                 configMapKeyRef:
-                  name: apikeystore
+                  name: auth-apikeystore
                   key: APIKEYSTORE_ADDRESS2
 
             - name: APIKEYSTORE_PROJECTID
               valueFrom:
                 configMapKeyRef:
-                  name: apikeystore
+                  name: auth-apikeystore
                   key: APIKEYSTORE_PROJECTID
 
 
             - name: APIKEYSTORE_PREFIX
               valueFrom:
                 configMapKeyRef:
-                  name: apikeystore
+                  name: auth-apikeystore
                   key: APIKEYSTORE_PREFIX
 
           readinessProbe:

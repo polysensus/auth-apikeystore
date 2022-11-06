@@ -1,9 +1,9 @@
 interpreter: bash -c
-name: apikeystore
-usage: conveniences and ergonomics for apikeystore
+name: auth-apikeystore
+usage: conveniences and ergonomics for auth-apikeystore
 options:
   address1:
-    default: "https://hoy.polysensus.io/stage/apikeystore"
+    default: "https://hoy.polysensus.io/stage/auth-apikeystore"
     #default: "http://127.0.0.1:8401"
   address2:
     default: "http://127.0.0.1:8401"

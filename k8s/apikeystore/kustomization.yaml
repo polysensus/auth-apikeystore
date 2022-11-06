@@ -1,5 +1,5 @@
 commonLabels:
-  app: apikeystore
+  app: auth-apikeystore
 resources:
   - deployment.yaml
   - service.yaml
@@ -8,10 +8,10 @@ patchesStrategicMerge:
   - deployment-serviceaccount.yaml
   - deployment-env.yaml
 configMapGenerator:
-  - name: apikeystore
+  - name: auth-apikeystore
     literals:
       - APIKEYSTORE_PROJECTID=hoy-dev-1
       - APIKEYSTORE_ADDRESS1=0.0.0.0:8401
       - APIKEYSTORE_ADDRESS2=0.0.0.0:8402
       - APIKEYSTORE_PREFIX=/
-      - APIKEYSTORE_EXCHANGEURL=http://tokenexchange:3000/token
+      - APIKEYSTORE_EXCHANGEURL=http://auth-tokenexchange:3000/token

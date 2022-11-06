@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: apikeystore
+  name: auth-apikeystore
 spec:
   template:
     spec:
@@ -14,7 +14,7 @@ spec:
           - name: APIKEYSTORE_EXCHANGEURL
             valueFrom:
               configMapKeyRef:
-                name: apikeystore
+                name: auth-apikeystore
                 key: APIKEYSTORE_EXCHANGEURL
 
           # current approach is to deploy a single tokenendpoint

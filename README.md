@@ -1,4 +1,4 @@
-# apikeystore
+# auth-apikeystore
 A service for creating and managing service api keys. Firestore specific.
 
 # Plan

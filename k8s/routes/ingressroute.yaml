@@ -3,30 +3,30 @@ apiVersion: traefik.containo.us/v1alpha1
 
 kind: IngressRoute
 metadata:
-  name: apikeystore
+  name: auth-apikeystore
 spec:
   entryPoints:
     - websecure
   routes:
-    - match: PathPrefix(`/apikeystore/`) && Method(`GET`)
+    - match: PathPrefix(`/auth-apikeystore/`) && Method(`GET`)
       kind: Rule
       services:
         - kind: Service
-          name: apikeystore
+          name: auth-apikeystore
           scheme: http
           port: http
       middlewares:
-        - name: apikeystore-strip-ingressroute-prefix
-    - match: PathPrefix(`/apikeystore/`) && Method(`POST`, `PUT`, `PATCH`, `DELETE`)
+        - name: auth-apikeystore-strip-ingressroute-prefix
+    - match: PathPrefix(`/auth-apikeystore/`) && Method(`POST`, `PUT`, `PATCH`, `DELETE`)
       kind: Rule
       services:
         - kind: Service
-          name: apikeystore
+          name: auth-apikeystore
           scheme: http
           port: http
           # port: http2
       middlewares:
-        - name: apikeystore-strip-ingressroute-prefix
+        - name: auth-apikeystore-strip-ingressroute-prefix
 
   tls:
     secretName: hoy-app-dev
