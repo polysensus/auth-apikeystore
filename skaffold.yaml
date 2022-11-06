@@ -14,7 +14,7 @@ build:
 
   artifacts:
     - context: .
-      image: apikeystore
+      image: auth-apikeystore
 
 deploy:
   kustomize:
