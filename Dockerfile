@@ -24,7 +24,7 @@ COPY apibin/ ./apibin/
 COPY apihttp/ ./apihttp/
 COPY service/ ./service/
 
-RUN find .
+# RUN find .
 
 WORKDIR /go/service
 # Skaffold passes in debug-oriented compiler flags

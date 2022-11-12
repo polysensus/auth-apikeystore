@@ -17,19 +17,19 @@ spec:
                 name: auth-apikeystore
                 key: APIKEYSTORE_EXCHANGEURL
 
-          # current approach is to deploy a single tokenendpoint
+          # current approach is to deploy a single auth-tokenexchange
           # in one namespace and manage its clients list manualy. The client
           # id secret here must match an entry configured for tokenendpoint
           # corresponding id/secret in it.
           - name: APIKEYSTORE_CLIENTID
             valueFrom:
               secretKeyRef:
-                name: tokenendpoint-clientid-secret
+                name: auth-tokenexchange-clientid-secret
                 key: CLIENT_ID
 
           - name: APIKEYSTORE_CLIENTSECRET
             valueFrom:
               secretKeyRef:
-                name: tokenendpoint-clientid-secret
+                name: auth-tokenexchange-clientid-secret
                 key: CLIENT_SECRET
 
