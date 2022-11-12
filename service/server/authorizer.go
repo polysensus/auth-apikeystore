@@ -62,7 +62,7 @@ func (a *APIKeyAuthz) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ref := a.db.Collection(apiKeysCollection).Doc(ak.ClientID)
+	ref := a.db.Collection(a.cfg.ClientCollectionID).Doc(ak.ClientID)
 	doc, err := ref.Get(ctx)
 	if err != nil {
 		if status.Code(err) != codes.NotFound {

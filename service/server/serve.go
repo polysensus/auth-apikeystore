@@ -27,34 +27,36 @@ const (
 )
 
 type Config struct {
-	Mode          string
-	ProjectID     string
-	Address1      string
-	Address2      string
-	Prefix        string
-	ExchangeURL   string
-	ClientID      string
-	ClientSecret  string
-	ShutdownGrace time.Duration
-	WriteTimeout  time.Duration
-	ReadTimeout   time.Duration
-	IdleTimeout   time.Duration
+	Mode               string
+	ProjectID          string
+	ClientCollectionID string
+	Address1           string
+	Address2           string
+	Prefix             string
+	ExchangeURL        string
+	ClientID           string
+	ClientSecret       string
+	ShutdownGrace      time.Duration
+	WriteTimeout       time.Duration
+	ReadTimeout        time.Duration
+	IdleTimeout        time.Duration
 }
 
 func NewConfig() Config {
 	cfg := Config{
-		Mode:          "",
-		ProjectID:     "",
-		Address1:      fmt.Sprintf("0.0.0.0:%d", DefaultPortHTTP1),
-		Address2:      fmt.Sprintf("0.0.0.0:%d", DefaultPortHTTP2),
-		Prefix:        "",
-		ExchangeURL:   "",
-		ClientID:      "",
-		ClientSecret:  "",
-		ShutdownGrace: time.Second * 15,
-		WriteTimeout:  time.Second * 15,
-		ReadTimeout:   time.Second * 15,
-		IdleTimeout:   time.Second * 60,
+		Mode:            "",
+		ProjectID:       "",
+		ClientCollectionID: "apikeystore:clients",
+		Address1:        fmt.Sprintf("0.0.0.0:%d", DefaultPortHTTP1),
+		Address2:        fmt.Sprintf("0.0.0.0:%d", DefaultPortHTTP2),
+		Prefix:          "",
+		ExchangeURL:     "",
+		ClientID:        "",
+		ClientSecret:    "",
+		ShutdownGrace:   time.Second * 15,
+		WriteTimeout:    time.Second * 15,
+		ReadTimeout:     time.Second * 15,
+		IdleTimeout:     time.Second * 60,
 	}
 	return cfg
 }

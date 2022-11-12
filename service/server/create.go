@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/robinbryce/apikeys"
 	"github.com/polysensus/auth-apikeystore/apibin"
+	"github.com/robinbryce/apikeys"
 )
 
 const (
-	defaultDBTimeout  = time.Second * 30
-	apiKeysCollection = "apiclients"
-	apiKeyRouteVar    = "apikey"
+	defaultDBTimeout = time.Second * 30
+	apiKeyRouteVar   = "apikey"
+	schemaVersion    = 1
 )
 
 type APIKeyCreator struct {
@@ -30,9 +30,10 @@ func NewAPIKeyCreator(cfg *Config) APIKeyCreator {
 
 type ClientRecord struct {
 	apikeys.Key
-	DisplayName string `firestore:"display_name"`
-	Audience    string `firestore:"aud"`
-	Scope       string `firestore:"scope"`
+	SchemaVersion int    `firestore:"schema_version"`
+	DisplayName   string `firestore:"display_name"`
+	Audience      string `firestore:"aud"`
+	Scope         string `firestore:"scope"`
 }
 
 // MarshalJSON ensures that derived_key is marshaled as url safe form for consistency with how the parts of the apikeys are serialized
@@ -95,7 +96,7 @@ func (a *APIKeyCreator) create(
 	}
 
 	// Use the client_id as the primary key
-	ref := a.db.Collection(apiKeysCollection).Doc(rec.ClientID)
+	ref := a.db.Collection(a.cfg.ClientCollectionID).Doc(rec.ClientID)
 
 	// As we just generated this key its essentially impossible for it already
 	// to exist unless our key generation is broken - in which case we want to

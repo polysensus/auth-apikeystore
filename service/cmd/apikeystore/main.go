@@ -34,6 +34,16 @@ func main() {
 	`)
 
 	f.StringVar(
+		&cfg.ProjectID, "projectid", cfg.ProjectID, `
+	GCP Project ID (a firebase project is a gcp project)
+	`)
+
+	f.StringVar(
+		&cfg.ClientCollectionID, "clientcollection", cfg.ClientCollectionID, `
+	Firestore collection id, where the clients and their api key records live
+	`)
+
+	f.StringVar(
 		&cfg.Address1, "address1", cfg.Address1, `
 	Listen address as host:port (http/1)
 	`)

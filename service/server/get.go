@@ -43,7 +43,7 @@ func (cc *ClientCollection) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ref := cc.db.Collection(apiKeysCollection).Doc(clientID)
+	ref := cc.db.Collection(cc.cfg.ClientCollectionID).Doc(clientID)
 
 	doc, err := ref.Get(ctx)
 	if err != nil {

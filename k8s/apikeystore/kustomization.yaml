@@ -11,6 +11,7 @@ configMapGenerator:
   - name: auth-apikeystore
     literals:
       - APIKEYSTORE_PROJECTID=hoy-dev-1
+      - APIKEYSTORE_CLIENTCOLLECTIONID="hoy-iam-dev:apikeystore:clients"
       - APIKEYSTORE_ADDRESS1=0.0.0.0:8401
       - APIKEYSTORE_ADDRESS2=0.0.0.0:8402
       - APIKEYSTORE_PREFIX=/
