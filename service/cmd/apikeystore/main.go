@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	Name = "auth-apikeystore"
+	Name      = "auth-apikeystore"
+	EnvPrefix = "apikeystore"
 )
 
 func main() {
@@ -91,7 +92,7 @@ func main() {
 		}
 	}
 
-	v.SetEnvPrefix(strings.ToUpper(Name))
+	v.SetEnvPrefix(strings.ToUpper(EnvPrefix))
 	v.AutomaticEnv()
 	reconcileOptions(f, v, Name)
 
