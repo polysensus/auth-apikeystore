@@ -7,13 +7,13 @@ resources:
 patchesStrategicMerge:
   - deployment-serviceaccount.yaml
   - deployment-env.yaml
-configMapGenerator:
-  - name: auth-apikeystore
-    literals:
-      - APIKEYSTORE_PROJECTID=hoy-iam-dev-3
-      # the local resources should override this to skaffold:<user>-<tag>:apikeystore:clients
-      - APIKEYSTORE_CLIENTCOLLECTIONID="skaffold:all:apikeystore:clients"
-      - APIKEYSTORE_ADDRESS1=0.0.0.0:8401
-      - APIKEYSTORE_ADDRESS2=0.0.0.0:8402
-      - APIKEYSTORE_PREFIX=/
-      - APIKEYSTORE_EXCHANGEURL=http://auth-tokenexchange:3000/token
+#configMapGenerator:
+#  - name: auth-apikeystore
+#    literals:
+#      - APIKEYSTORE_PROJECTID=hoy-iam-dev-3
+#      # the local resources should override this to skaffold:<user>-<tag>:apikeystore:clients
+#      - APIKEYSTORE_CLIENTCOLLECTIONID="skaffold:all:apikeystore:clients"
+#      - APIKEYSTORE_ADDRESS1=0.0.0.0:8401
+#      - APIKEYSTORE_ADDRESS2=0.0.0.0:8402
+#      - APIKEYSTORE_PREFIX=/
+#      - APIKEYSTORE_EXCHANGEURL=http://auth-tokenexchange.hoy-iam-dev.svc.cluster.local:3000/token
