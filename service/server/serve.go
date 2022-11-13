@@ -42,21 +42,41 @@ type Config struct {
 	IdleTimeout        time.Duration
 }
 
+func (cfg Config) String() string {
+	return fmt.Sprintf(`
+		Mode: %s
+		ProjectID: %s
+		ClientCollectionID: %s
+		Address1: %s
+		Address2: %s
+		Prefix: %s
+		ExchangeURL: %s
+		ClientID: %s
+		ClientSecret: %s
+		ShutdownGrace: %s
+		WriteTimeout: %v
+		ReadTimeout: %v
+		IdleTimeout: %v
+		`,
+		cfg.Mode, cfg.ProjectID, cfg.ClientCollectionID, cfg.Address1, cfg.Address2, cfg.Prefix, cfg.ExchangeURL, cfg.ClientID, "***", cfg.ShutdownGrace, cfg.WriteTimeout, cfg.ReadTimeout, cfg.IdleTimeout,
+	)
+}
+
 func NewConfig() Config {
 	cfg := Config{
-		Mode:            "",
-		ProjectID:       "",
+		Mode:               "",
+		ProjectID:          "",
 		ClientCollectionID: "apikeystore:clients",
-		Address1:        fmt.Sprintf("0.0.0.0:%d", DefaultPortHTTP1),
-		Address2:        fmt.Sprintf("0.0.0.0:%d", DefaultPortHTTP2),
-		Prefix:          "",
-		ExchangeURL:     "",
-		ClientID:        "",
-		ClientSecret:    "",
-		ShutdownGrace:   time.Second * 15,
-		WriteTimeout:    time.Second * 15,
-		ReadTimeout:     time.Second * 15,
-		IdleTimeout:     time.Second * 60,
+		Address1:           fmt.Sprintf("0.0.0.0:%d", DefaultPortHTTP1),
+		Address2:           fmt.Sprintf("0.0.0.0:%d", DefaultPortHTTP2),
+		Prefix:             "",
+		ExchangeURL:        "",
+		ClientID:           "",
+		ClientSecret:       "",
+		ShutdownGrace:      time.Second * 15,
+		WriteTimeout:       time.Second * 15,
+		ReadTimeout:        time.Second * 15,
+		IdleTimeout:        time.Second * 60,
 	}
 	return cfg
 }

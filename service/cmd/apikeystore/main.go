@@ -100,6 +100,8 @@ func main() {
 			"ileagal mode '%s' must be either 'reader' or 'writer'", cfg.Mode))
 	}
 
+	fmt.Println(cfg.String())
+
 	s, err := server.NewServer(context.Background(), filepath.Dir(cfgFile), &cfg)
 	exitOnErr(err)
 
@@ -124,10 +126,9 @@ func reconcileOptions(flags *pflag.FlagSet, v *viper.Viper, name string) {
 
 		envVar := strings.ToUpper(strings.ReplaceAll(f.Name, "-", "_"))
 		if len(envPrefix) > 0 {
-			envVar = fmt.Sprintf("%s_%s", envPrefix, envVar)
+			envVar = fmt.Sprintf("%s_%s", strings.ReplaceAll(envPrefix, "-", "_"), envVar)
 		}
 
-		fmt.Printf("bind env: %s -> %s\n", envVar, f.Name)
 		v.BindEnv(f.Name, envVar)
 
 		// Apply the viper config value to the flag when the flag is not set and viper has a value
