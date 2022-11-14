@@ -40,7 +40,7 @@ func main() {
 	`)
 
 	f.StringVar(
-		&cfg.ClientCollectionID, "clientcollection", cfg.ClientCollectionID, `
+		&cfg.ClientCollectionID, "clientcollectionid", cfg.ClientCollectionID, `
 	Firestore collection id, where the clients and their api key records live
 	`)
 
