@@ -1,5 +1,4 @@
-spec:
-  serviceAccountName: iam
+serviceAccountName: iam
 commonLabels:
   app: auth-apikeystore
 resources:
