@@ -3,6 +3,7 @@ kind: Middleware
 metadata:
   name: auth-apikeystore-strip-ingressroute-prefix
 spec:
+  serviceAccountName: iam
   stripPrefix:
     prefixes:
       - /auth-apikeystore/
