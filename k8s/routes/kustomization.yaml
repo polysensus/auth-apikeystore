@@ -1,3 +1,5 @@
+spec:
+  serviceAccountName: iam
 resources:
   - ingressroute.yaml
   - middleware-stripprefix-ingressroute.yaml
