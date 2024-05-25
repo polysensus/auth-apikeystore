@@ -1,4 +1,3 @@
-serviceAccountName: iam
 commonLabels:
   app: auth-apikeystore
 resources:
